@@ -1,5 +1,7 @@
 import tkinter
 from tkinter import *
+import json
+from datetime import datetime
 
 #Criação da classe Task
 class Task:
@@ -7,14 +9,36 @@ class Task:
         self.description = description
         self.completed = completed
 
+    #Convertendo a classe em um dicionário
+    def to_dict(self):
+      return {"description": self.description, "completed": self.completed}
+
+    #Cria uma instância de task a partir de um dicionário
+    @classmethod
+    def from_dict(cls, task_dict):
+      return cls(task_dict["description"], task_dict["completed"]) 
+
     def __str__(self):
         return f"{self.description}"
     
 #Criação da classe WorkTask    
 class WorkTask(Task):
-    def __init__(self, description, project, completed):
+    def __init__(self, description, completed=False):
         super().__init__(description, completed)
-        self.project = project
+        self.project = None
+
+    def set_project(self, project):
+      self.project = project    
+
+    #Convertendo a classe em um dicionário
+    def to_dict(self):
+      task_dict = super().to_dict()
+      task_dict["project"] = self.project
+      return task_dict
+
+    #Cria uma instância de worktask a partir de um dicionário
+    def from_dict(cls, task_dict):
+      return cls(task_dict["description"], task_dict["project"], task_dict["completed"]) 
 
     def __str__(self):
         return f"{self.description}"
@@ -58,6 +82,10 @@ class ToDoListApp:
     self.button = Button(self.frame, text = "ADD", font = "arial 20 bold", width = 6, bg = "#D2B48C", fg = "#fff", bd = 0, command = self.addTask)
     self.button.place (x = 300, y = 0)
 
+    self.is_work_task_var = IntVar()
+    self.is_work_task_checkbox = Checkbutton(root, text="Work Task", font="arial 12", width = 8, variable=self.is_work_task_var, bg=root.cget('bg'))
+    self.is_work_task_checkbox.place(x=298, y=150)
+
     #listbox
     self.frame1 = Frame(root, bd = 3, width = 700, height = 280, bg = "#32405b")
     self.frame1.pack(pady = (160, 0))
@@ -82,35 +110,39 @@ class ToDoListApp:
     self.task_entry.delete(0, END)
 
     if task_description:
-      new_task = Task(task_description)
-      with open("tasklist.txt", 'a') as taskfile:
-        taskfile.write(f"\n{new_task}")
+      if self.is_work_task_var.get() == 1:
+        new_task = WorkTask(task_description)
+      else:   
+        new_task = Task(task_description)
+      with open("tasklist.json", 'a') as taskfile:
+        taskfile.write(json.dumps(new_task.to_dict()) + "\n")
         self.task_list.append(new_task)
-        self.listbox.insert( END, new_task)  
+        self.listbox.insert( END, new_task)
 
   #Função de remover tarefa
   def deleteTask(self):
     task_index = self.listbox.curselection()
     if task_index:
       task = self.task_list.pop(task_index[0])
-      with open("tasklist.txt", 'w') as taskfile:
+      with open("tasklist.json", 'w') as taskfile:
         for t in self.task_list:
-          taskfile.write(str(t) + "\n")
+          taskfile.write(json.dumps(t.to_dict()) + "\n")
       self.listbox.delete(task_index)
 
   #Função de abrir o arquivo de tarefas
   def openTaskFile(self):
     try:
-      with open("tasklist.txt", "r") as taskfile:
+      with open("tasklist.json", "r") as taskfile:
         tasks = taskfile.readlines()
 
-      for task in tasks:
-        if task != '\n':
-          self.task_list.append(Task(task.strip()))
-          self.listbox.insert(END, task.strip())
+      for task_str in tasks:
+        task_dict = json.loads(task_str)
+        new_task = Task.from_dict(task_dict)
+        self.task_list.append(new_task)
+        self.listbox.insert(END, new_task)
 
     except FileNotFoundError:
-      with open('tasklist.txt', 'w'):
+      with open('tasklist.json', 'w'):
         pass   
 
 #execução 
