@@ -1,4 +1,4 @@
-<h1 center>Aplicativo "to do" em Python para a matéria de LPP</h1>
+<h1 center>Aplicativo "to-do list" em Python para a matéria de LPP</h1>
 
 
 
