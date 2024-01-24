@@ -42,6 +42,12 @@ class WorkTask(Task):
 
     def __str__(self):
         return f"{self.description}"
+      
+class EmptyTaskDescriptionError(Exception):
+    pass
+  
+class ValueError(Exception):
+    pass
 
 #Classe da aplicação
 class ToDoListApp:
@@ -109,25 +115,30 @@ class ToDoListApp:
     task_description = self.task_entry.get()
     self.task_entry.delete(0, END)
 
-    if task_description:
-      if self.is_work_task_var.get() == 1:
-        new_task = WorkTask(task_description)
-      else:   
-        new_task = Task(task_description)
-      with open("tasklist.json", 'a') as taskfile:
-        taskfile.write(json.dumps(new_task.to_dict()) + "\n")
-        self.task_list.append(new_task)
-        self.listbox.insert( END, new_task)
+    if not task_description:
+      raise EmptyTaskDescriptionError("A tarefa nao pode ser vazia.")
+      
+    if self.is_work_task_var.get() == 1:
+      new_task = WorkTask(task_description)
+    else:   
+      new_task = Task(task_description)
+    with open("tasklist.json", 'a') as taskfile:
+      taskfile.write(json.dumps(new_task.to_dict()) + "\n")
+      self.task_list.append(new_task)
+      self.listbox.insert( END, new_task)
 
   #Função de remover tarefa
   def deleteTask(self):
     task_index = self.listbox.curselection()
-    if task_index:
-      task = self.task_list.pop(task_index[0])
-      with open("tasklist.json", 'w') as taskfile:
-        for t in self.task_list:
-          taskfile.write(json.dumps(t.to_dict()) + "\n")
-      self.listbox.delete(task_index)
+    
+    if not task_index:
+        raise ValueError("Nenhuma tarefa selecionada. Selecione uma tarefa antes de excluir.")
+      
+    task = self.task_list.pop(task_index[0])
+    with open("tasklist.json", 'w') as taskfile:
+      for t in self.task_list:
+        taskfile.write(json.dumps(t.to_dict()) + "\n")
+    self.listbox.delete(task_index)
 
   #Função de abrir o arquivo de tarefas
   def openTaskFile(self):
