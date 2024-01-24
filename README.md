@@ -6,9 +6,10 @@
 
 + Aplicativo desenvolvido em python
 + Utiliza os conhecimentos aprendidos em sala de aula
-+ Herança
++ Orientação a objetos (Classes, heranças, ...)
 + Exceção
-+ Recursos da linguagem como Bibliotecas
++ Recursos da linguagem
++ Bibliotecas
 
 ### Por que desenvolver em python?
 
