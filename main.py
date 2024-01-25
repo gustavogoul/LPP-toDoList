@@ -1,5 +1,8 @@
 import tkinter
 from tkinter import *
+from tkinter import simpledialog
+from tkinter import ttk
+import tkinter.messagebox
 import json
 from datetime import datetime
 
@@ -89,8 +92,8 @@ class ToDoListApp:
     self.button.place (x = 300, y = 0)
 
     self.is_work_task_var = IntVar()
-    self.is_work_task_checkbox = Checkbutton(root, text="Work Task", font="arial 12", width = 8, variable=self.is_work_task_var, bg=root.cget('bg'))
-    self.is_work_task_checkbox.place(x=298, y=150)
+    self.is_work_task_checkbox = Checkbutton(root, text="Tarefas do trabalho", font="arial 11", width = 16, variable=self.is_work_task_var, bg=root.cget('bg'))
+    self.is_work_task_checkbox.place(x=235, y=150)
 
     #listbox
     self.frame1 = Frame(root, bd = 3, width = 700, height = 280, bg = "#32405b")
@@ -106,7 +109,11 @@ class ToDoListApp:
 
     #delete
     self.Delete_icon = PhotoImage(file = "Images/delete.png")
-    Button(root, image = self.Delete_icon, bd = 0, command = self.deleteTask).pack(side = BOTTOM, pady = 13)
+    Button(root, image = self.Delete_icon, bd = 0, command = self.deleteTask).pack(side = LEFT, padx = 20, pady = 10)
+    
+    #edit
+    self.Edit_icon = PhotoImage(file = "Images/edit.png")
+    Button(root, image = self.Edit_icon, bd = 0, command = self.editTask).pack(side = RIGHT, padx = 20, pady = 10)
 
     self.openTaskFile()
     
@@ -139,6 +146,55 @@ class ToDoListApp:
       for t in self.task_list:
         taskfile.write(json.dumps(t.to_dict()) + "\n")
     self.listbox.delete(task_index)
+  
+  def editTask(self):
+    task_index = self.listbox.curselection()
+
+    if not task_index:
+        raise ValueError("Nenhuma tarefa selecionada. Selecione uma tarefa antes de editar.")
+
+    # Obtém a tarefa atual
+    old_task = self.task_list[task_index[0]]
+
+    # Cria uma janela de diálogo para edição
+    edit_dialog = simpledialog.Toplevel(self.master)
+    edit_dialog.title("Editar Tarefa")
+
+    # Adiciona uma Entry para a nova descrição
+    Label(edit_dialog, text="Nova Descrição:").pack()
+    new_task_description_entry = Entry(edit_dialog, width=30)
+    new_task_description_entry.insert(END, old_task.description)
+    new_task_description_entry.pack()
+
+    # Adiciona um Checkbutton para indicar se a tarefa está concluída
+    completed_var = IntVar()
+    completed_var.set(old_task.completed)
+    completed_checkbox = ttk.Checkbutton(edit_dialog, text="Tarefa Concluída", variable=completed_var)
+    completed_checkbox.pack()
+
+    # Função para salvar as alterações
+    def save_changes():
+        new_description = new_task_description_entry.get()
+        old_task.description = new_description
+        old_task.completed = completed_var.get()
+
+        # Atualiza o arquivo JSON
+        with open("tasklist.json", 'w') as taskfile:
+            for t in self.task_list:
+                taskfile.write(json.dumps(t.to_dict()) + "\n")
+
+        # Atualiza a exibição na lista
+        self.listbox.delete(task_index)
+        if old_task.completed:
+            self.listbox.insert(task_index, f"~{new_description}~   * TAREFA CONCLUÍDA")
+        else:
+            self.listbox.insert(task_index, new_description)
+
+        edit_dialog.destroy()
+
+    # Adiciona um botão para salvar as alterações
+    save_button = Button(edit_dialog, text="Salvar", command=save_changes)
+    save_button.pack()
 
   #Função de abrir o arquivo de tarefas
   def openTaskFile(self):
