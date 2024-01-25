@@ -161,7 +161,7 @@ class ToDoListApp:
     edit_dialog.title("Editar Tarefa")
 
     # Adiciona uma Entry para a nova descrição
-    Label(edit_dialog, text="Nova Descrição:").pack()
+    Label(edit_dialog, text="Nova Descrição:\n").pack()
     new_task_description_entry = Entry(edit_dialog, width=30)
     new_task_description_entry.insert(END, old_task.description)
     new_task_description_entry.pack()
@@ -169,7 +169,7 @@ class ToDoListApp:
     # Adiciona um Checkbutton para indicar se a tarefa está concluída
     completed_var = IntVar()
     completed_var.set(old_task.completed)
-    completed_checkbox = ttk.Checkbutton(edit_dialog, text="Tarefa Concluída", variable=completed_var)
+    completed_checkbox = ttk.Checkbutton(edit_dialog, text="\nTarefa Concluída\n", variable=completed_var)
     completed_checkbox.pack()
 
     # Função para salvar as alterações
