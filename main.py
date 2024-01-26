@@ -7,26 +7,27 @@ import json
 
 #Criação da classe Task
 class Task:
-    def __init__(self, description, completed=False):
+    def __init__(self, description, completed=False, priority="normal"):
         self.description = description
         self.completed = completed
+        self.priority = priority
 
     #Convertendo a classe em um dicionário
     def to_dict(self):
-      return {"description": self.description, "completed": self.completed}
+      return {"description": self.description, "completed": self.completed, "priority": self.priority}
 
     #Cria uma instância de task a partir de um dicionário
     @classmethod
     def from_dict(cls, task_dict):
-      return cls(task_dict["description"], task_dict["completed"]) 
+      return cls(task_dict["description"], task_dict["completed"], task_dict.get("priority", "normal")) 
 
     def __str__(self):
-        return f"{self.description}"
+        return f"{self.description} - Prioridade: {self.priority}"
     
 #Criação da classe WorkTask    
 class WorkTask(Task):
-    def __init__(self, description, completed=False):
-        super().__init__(description, completed)
+    def __init__(self, description, completed=False, priority="alta"):
+        super().__init__(description, completed, priority)
         self.project = None
 
     def set_project(self, project):
@@ -41,10 +42,10 @@ class WorkTask(Task):
     #Cria uma instância de worktask a partir de um dicionário
     @classmethod
     def from_dict(cls, task_dict):
-      return cls(task_dict["description"], task_dict["completed"]) 
+      return cls(task_dict["description"], task_dict["completed"], task_dict.get("priority", "alta")) 
 
     def __str__(self):
-        return f"{self.description}"
+        return f"{self.description} - Prioridade: {self.priority}"
       
 class EmptyTaskDescriptionError(Exception):
     pass
@@ -124,11 +125,13 @@ class ToDoListApp:
 
     if not task_description:
       raise EmptyTaskDescriptionError("A tarefa nao pode ser vazia.")
+    
+    priority = "alta" if self.is_work_task_var.get() == 1 else "normal"
       
     if self.is_work_task_var.get() == 1:
-      new_task = WorkTask(task_description)
+      new_task = WorkTask(task_description, priority=priority)
     else:   
-      new_task = Task(task_description)
+      new_task = Task(task_description, priority=priority)
     with open("tasklist.json", 'a') as taskfile:
       taskfile.write(json.dumps(new_task.to_dict()) + "\n")
     self.task_list.append(new_task)
@@ -192,7 +195,8 @@ class ToDoListApp:
             self.listbox.insert(task_index, f"{new_description}    TAREFA CONCLUÍDA")
             self.listbox.itemconfig(task_index, {'fg': 'red'})
         else:
-            self.listbox.insert(task_index, new_description)
+            display_text = f"{new_description} - Prioridade: {old_task.priority}"
+            self.listbox.insert(task_index, display_text)
             self.listbox.itemconfig(task_index, {'fg': '#DAA520' if isinstance(old_task, WorkTask) else '#90EE90'})    
 
         edit_dialog.destroy()
