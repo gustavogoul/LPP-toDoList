@@ -190,9 +190,10 @@ class ToDoListApp:
         self.listbox.delete(task_index)
         if old_task.completed:
             self.listbox.insert(task_index, f"{new_description}    TAREFA CONCLUÍDA")
+            self.listbox.itemconfig(task_index, {'fg': 'red'})
         else:
             self.listbox.insert(task_index, new_description)
-        self.listbox.itemconfig(task_index, {'fg': '#DAA520' if isinstance(old_task, WorkTask) else '#90EE90'})    
+            self.listbox.itemconfig(task_index, {'fg': '#DAA520' if isinstance(old_task, WorkTask) else '#90EE90'})    
 
         edit_dialog.destroy()
 
