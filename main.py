@@ -4,7 +4,6 @@ from tkinter import simpledialog
 from tkinter import ttk
 import tkinter.messagebox
 import json
-from datetime import datetime
 
 #Criação da classe Task
 class Task:
@@ -40,8 +39,9 @@ class WorkTask(Task):
       return task_dict
 
     #Cria uma instância de worktask a partir de um dicionário
+    @classmethod
     def from_dict(cls, task_dict):
-      return cls(task_dict["description"], task_dict["project"], task_dict["completed"]) 
+      return cls(task_dict["description"], task_dict["completed"]) 
 
     def __str__(self):
         return f"{self.description}"
@@ -99,7 +99,7 @@ class ToDoListApp:
     self.frame1 = Frame(root, bd = 3, width = 700, height = 280, bg = "#32405b")
     self.frame1.pack(pady = (160, 0))
 
-    self.listbox = Listbox(self.frame1, font = ('arial', 12), width = 40, height = 16, bg = "#32405b", fg = "white", cursor = "hand2", selectbackground = "#000080")
+    self.listbox = Listbox(self.frame1, font = ('arial', 12), width = 40, height = 16, bg = "#32405b", fg = "#90EE90", cursor = "hand2", selectbackground = "#000080")
     self.listbox.pack(side = LEFT, fill = BOTH, padx = 2)
     self.Scrollbar = Scrollbar(self.frame1)
     self.Scrollbar.pack(side = RIGHT, fill = BOTH)
@@ -131,8 +131,11 @@ class ToDoListApp:
       new_task = Task(task_description)
     with open("tasklist.json", 'a') as taskfile:
       taskfile.write(json.dumps(new_task.to_dict()) + "\n")
-      self.task_list.append(new_task)
-      self.listbox.insert( END, new_task)
+    self.task_list.append(new_task)
+    index = END
+    self.listbox.insert( END, new_task)
+    if isinstance(new_task, WorkTask):
+      self.listbox.itemconfig(index, {'fg': '#DAA520'})
 
   #Função de remover tarefa
   def deleteTask(self):
@@ -186,9 +189,10 @@ class ToDoListApp:
         # Atualiza a exibição na lista
         self.listbox.delete(task_index)
         if old_task.completed:
-            self.listbox.insert(task_index, f"~{new_description}~   * TAREFA CONCLUÍDA")
+            self.listbox.insert(task_index, f"{new_description}    TAREFA CONCLUÍDA")
         else:
             self.listbox.insert(task_index, new_description)
+        self.listbox.itemconfig(task_index, {'fg': '#DAA520' if isinstance(old_task, WorkTask) else '#90EE90'})    
 
         edit_dialog.destroy()
 
@@ -204,9 +208,15 @@ class ToDoListApp:
 
       for task_str in tasks:
         task_dict = json.loads(task_str)
-        new_task = Task.from_dict(task_dict)
+        if 'project' in task_dict:
+          new_task = WorkTask.from_dict(task_dict)
+        else:  
+          new_task = Task.from_dict(task_dict)  
         self.task_list.append(new_task)
         self.listbox.insert(END, new_task)
+        if isinstance(new_task, WorkTask):
+          index = self.listbox.size() - 1
+          self.listbox.itemconfig(index, {'fg': '#DAA520'})  
 
     except FileNotFoundError:
       with open('tasklist.json', 'w'):

@@ -14,6 +14,6 @@
 ### Por que desenvolver em python?
 
 + Sintaxe simples e de fácil aprendizado
-+ Vastas bibliotecas e frameworks que ajudam no desenvolvimento
++ Vasta bibliotecas e frameworks que ajudam no desenvolvimento
 + Tkinter permite a utilização de uma interface amigável para o usuário
 + Python é uma linguagem bem versátil
