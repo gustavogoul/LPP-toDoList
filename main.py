@@ -118,27 +118,42 @@ class ToDoListApp:
 
     self.openTaskFile()
     
-  #Função de adicionar tarefa
+  # Função de adicionar tarefa
   def addTask(self):
     task_description = self.task_entry.get()
     self.task_entry.delete(0, END)
 
     if not task_description:
-      raise EmptyTaskDescriptionError("A tarefa nao pode ser vazia.")
-    
+        raise EmptyTaskDescriptionError("A tarefa não pode ser vazia.")
+
     priority = "alta" if self.is_work_task_var.get() == 1 else "normal"
-      
+
     if self.is_work_task_var.get() == 1:
-      new_task = WorkTask(task_description, priority=priority)
-    else:   
-      new_task = Task(task_description, priority=priority)
+        new_task = WorkTask(task_description, priority=priority)
+    else:
+        new_task = Task(task_description, priority=priority)
+
+    # Insere a nova tarefa na posição correta da lista
+    index = END
+    if priority == "alta":
+        index = self.find_insert_index_high_priority()
+    
+    self.task_list.append(new_task)
+    self.listbox.insert(index, str(new_task))  # Converta a tarefa para uma string
+
+    # Configure a cor do texto se for uma WorkTask
+    if isinstance(new_task, WorkTask):
+        self.listbox.itemconfig(index, {'fg': '#DAA520'})
+        
     with open("tasklist.json", 'a') as taskfile:
       taskfile.write(json.dumps(new_task.to_dict()) + "\n")
-    self.task_list.append(new_task)
-    index = END
-    self.listbox.insert( END, new_task)
-    if isinstance(new_task, WorkTask):
-      self.listbox.itemconfig(index, {'fg': '#DAA520'})
+
+  # Função para encontrar a posição correta para inserir tarefas de alta prioridade
+  def find_insert_index_high_priority(self):
+    for i, task in enumerate(self.task_list):
+        if isinstance(task, WorkTask) and task.priority == "alta":
+            return i
+    return END
 
   #Função de remover tarefa
   def deleteTask(self):
@@ -210,18 +225,25 @@ class ToDoListApp:
     try:
       with open("tasklist.json", "r") as taskfile:
         tasks = taskfile.readlines()
+        
+      task_objects = []
 
       for task_str in tasks:
         task_dict = json.loads(task_str)
         if 'project' in task_dict:
           new_task = WorkTask.from_dict(task_dict)
         else:  
-          new_task = Task.from_dict(task_dict)  
-        self.task_list.append(new_task)
-        self.listbox.insert(END, new_task)
-        if isinstance(new_task, WorkTask):
-          index = self.listbox.size() - 1
-          self.listbox.itemconfig(index, {'fg': '#DAA520'})  
+          new_task = Task.from_dict(task_dict)
+        task_objects.append(new_task)
+          
+      sorted_tasks = sorted(task_objects, key=lambda x: x.priority, reverse=False)
+      
+      for new_task in sorted_tasks:
+            self.task_list.append(new_task)
+            index = END
+            self.listbox.insert(END, new_task)
+            if isinstance(new_task, WorkTask):
+                self.listbox.itemconfig(index, {'fg': '#DAA520'})
 
     except FileNotFoundError:
       with open('tasklist.json', 'w'):

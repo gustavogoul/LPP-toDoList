@@ -1,7 +1,8 @@
-{"description": "dfdsf", "completed": 1}
-{"description": "dasdasda", "completed": 1, "project": null}
-{"description": "asdasd", "completed": 1}
-{"description": "aas", "completed": false}
-{"description": "asdaaaaaaaa", "completed": 0, "project": null}
-{"description": "teste", "completed": 1}
-{"description": "ffffff", "completed": 0, "project": null}
+{"description": "Trabalho tarefa 1", "completed": 1, "priority": "alta", "project": null}
+{"description": "Trabalho tarefa 2", "completed": 1, "priority": "alta", "project": null}
+{"description": "Trabalho tarefa 3", "completed": 0, "priority": "alta", "project": null}
+{"description": "Trabalho tarefa 4", "completed": false, "priority": "alta", "project": null}
+{"description": "Normal 1", "completed": 0, "priority": "normal"}
+{"description": "Casa", "completed": 0, "priority": "normal"}
+{"description": "Limpar banheiro", "completed": 0, "priority": "normal"}
+{"description": "Lavar lou\u00e7as", "completed": 1, "priority": "normal"}
