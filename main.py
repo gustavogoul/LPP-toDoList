@@ -5,7 +5,6 @@ from tkinter import ttk
 import tkinter.messagebox
 import json
 
-#Criação da classe Task
 class Task:
     def __init__(self, description, completed=False, priority="normal"):
         self.description = description
@@ -23,8 +22,7 @@ class Task:
 
     def __str__(self):
         return f"{self.description} - Prioridade: {self.priority}"
-    
-#Criação da classe WorkTask    
+ 
 class WorkTask(Task):
     def __init__(self, description, completed=False, priority="alta"):
         super().__init__(description, completed, priority)
@@ -53,7 +51,6 @@ class EmptyTaskDescriptionError(Exception):
 class ValueError(Exception):
     pass
 
-#Classe da aplicação
 class ToDoListApp:
   def __init__(self, master):
     self.master = master
@@ -63,11 +60,9 @@ class ToDoListApp:
 
     self.task_list = []
 
-    #icon
     self.Image_icon = PhotoImage(file = "Images/task.png")
     root.iconphoto(False, self.Image_icon)
 
-    #top bar
     self.TopImage = PhotoImage(file = "Images/topbar.png")
     Label(root, image = self.TopImage).pack()
 
@@ -84,7 +79,6 @@ class ToDoListApp:
     self.frame = Frame(root, width = 400, height = 50, bg = "white")
     self.frame.place(x = 0, y = 180)
 
-    task = StringVar()
     self.task_entry = Entry(self.frame, width = 18, font = "arial 20", bd = 0)
     self.task_entry.place(x = 10, y = 7)
     self.task_entry.focus()
@@ -96,7 +90,7 @@ class ToDoListApp:
     self.is_work_task_checkbox = Checkbutton(root, text="Tarefas do trabalho", font="arial 11", width = 16, variable=self.is_work_task_var, bg=root.cget('bg'))
     self.is_work_task_checkbox.place(x=235, y=150)
 
-    #listbox
+    #lista
     self.frame1 = Frame(root, bd = 3, width = 700, height = 280, bg = "#32405b")
     self.frame1.pack(pady = (160, 0))
 
@@ -108,17 +102,14 @@ class ToDoListApp:
     self.listbox.config(yscrollcommand = self.Scrollbar.set)
     self.Scrollbar.config(command = self.listbox.yview)
 
-    #delete
     self.Delete_icon = PhotoImage(file = "Images/delete.png")
     Button(root, image = self.Delete_icon, bd = 0, command = self.deleteTask).pack(side = LEFT, padx = 20, pady = 10)
-    
-    #edit
+
     self.Edit_icon = PhotoImage(file = "Images/edit.png")
     Button(root, image = self.Edit_icon, bd = 0, command = self.editTask).pack(side = RIGHT, padx = 20, pady = 10)
 
     self.openTaskFile()
-    
-  # Função de adicionar tarefa
+
   def addTask(self):
     task_description = self.task_entry.get()
     self.task_entry.delete(0, END)
@@ -133,7 +124,6 @@ class ToDoListApp:
     else:
         new_task = Task(task_description, priority=priority)
 
-    # Insere a nova tarefa na posição correta da lista
     index = END
     if priority == "alta":
         index = self.find_insert_index_high_priority()
@@ -141,21 +131,18 @@ class ToDoListApp:
     self.task_list.append(new_task)
     self.listbox.insert(index, str(new_task))  # Converta a tarefa para uma string
 
-    # Configure a cor do texto se for uma WorkTask
     if isinstance(new_task, WorkTask):
         self.listbox.itemconfig(index, {'fg': '#DAA520'})
         
     with open("tasklist.json", 'a') as taskfile:
       taskfile.write(json.dumps(new_task.to_dict()) + "\n")
 
-  # Função para encontrar a posição correta para inserir tarefas de alta prioridade
   def find_insert_index_high_priority(self):
     for i, task in enumerate(self.task_list):
         if isinstance(task, WorkTask) and task.priority == "alta":
             return i
     return END
 
-  #Função de remover tarefa
   def deleteTask(self):
     task_index = self.listbox.curselection()
     
@@ -174,37 +161,30 @@ class ToDoListApp:
     if not task_index:
         raise ValueError("Nenhuma tarefa selecionada. Selecione uma tarefa antes de editar.")
 
-    # Obtém a tarefa atual
     old_task = self.task_list[task_index[0]]
 
-    # Cria uma janela de diálogo para edição
     edit_dialog = simpledialog.Toplevel(self.master)
     edit_dialog.title("Editar Tarefa")
 
-    # Adiciona uma Entry para a nova descrição
     Label(edit_dialog, text="Nova Descrição:\n").pack()
     new_task_description_entry = Entry(edit_dialog, width=30)
     new_task_description_entry.insert(END, old_task.description)
     new_task_description_entry.pack()
 
-    # Adiciona um Checkbutton para indicar se a tarefa está concluída
     completed_var = IntVar()
     completed_var.set(old_task.completed)
     completed_checkbox = ttk.Checkbutton(edit_dialog, text="\nTarefa Concluída\n", variable=completed_var)
     completed_checkbox.pack()
 
-    # Função para salvar as alterações
     def save_changes():
         new_description = new_task_description_entry.get()
         old_task.description = new_description
         old_task.completed = completed_var.get()
 
-        # Atualiza o arquivo JSON
         with open("tasklist.json", 'w') as taskfile:
             for t in self.task_list:
                 taskfile.write(json.dumps(t.to_dict()) + "\n")
 
-        # Atualiza a exibição na lista
         self.listbox.delete(task_index)
         if old_task.completed:
             self.listbox.insert(task_index, f"{new_description}    TAREFA CONCLUÍDA")
@@ -216,11 +196,9 @@ class ToDoListApp:
 
         edit_dialog.destroy()
 
-    # Adiciona um botão para salvar as alterações
     save_button = Button(edit_dialog, text="Salvar", command=save_changes)
     save_button.pack()
 
-  #Função de abrir o arquivo de tarefas
   def openTaskFile(self):
     try:
       with open("tasklist.json", "r") as taskfile:
@@ -249,7 +227,6 @@ class ToDoListApp:
       with open('tasklist.json', 'w'):
         pass   
 
-#execução 
 if __name__ == "__main__":
     root = Tk()
     app = ToDoListApp(root)
