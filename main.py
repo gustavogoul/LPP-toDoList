@@ -111,37 +111,41 @@ class ToDoListApp:
     self.openTaskFile()
 
   def addTask(self):
-    task_description = self.task_entry.get()
-    self.task_entry.delete(0, END)
+    try:
+        task_description = self.task_entry.get()
+        self.task_entry.delete(0, END)
 
-    if not task_description:
-        raise EmptyTaskDescriptionError("A tarefa não pode ser vazia.")
+        if not task_description:
+            raise EmptyTaskDescriptionError("A tarefa não pode ser vazia.")
 
-    priority = "alta" if self.is_work_task_var.get() == 1 else "normal"
+        priority = "alta" if self.is_work_task_var.get() == 1 else "normal"
 
-    if self.is_work_task_var.get() == 1:
-        new_task = WorkTask(task_description, priority=priority)
-    else:
-        new_task = Task(task_description, priority=priority)
+        if self.is_work_task_var.get() == 1:
+            new_task = WorkTask(task_description, priority=priority)
+        else:
+            new_task = Task(task_description, priority=priority)
 
-    index = END
-    if priority == "alta":
-        index = self.find_insert_index_high_priority()
-    
-    self.task_list.append(new_task)
-    self.listbox.insert(index, str(new_task))  # Converta a tarefa para uma string
+        index = END
+        if priority == "alta":
+            index = self.find_insert_index_high_priority()
 
-    if isinstance(new_task, WorkTask):
-        self.listbox.itemconfig(index, {'fg': '#DAA520'})
-        
-    with open("tasklist.json", 'a') as taskfile:
-      taskfile.write(json.dumps(new_task.to_dict()) + "\n")
+        self.task_list.append(new_task)
+        self.listbox.insert(index, str(new_task))  # Converta a tarefa para uma string
+
+        if isinstance(new_task, WorkTask):
+            self.listbox.itemconfig(index, {'fg': '#DAA520'})
+
+        with open("tasklist.json", 'a') as taskfile:
+            taskfile.write(json.dumps(new_task.to_dict()) + "\n")
+
+    except EmptyTaskDescriptionError as e:
+        print(f"Erro ao adicionar tarefa.")
 
   def find_insert_index_high_priority(self):
-    for i, task in enumerate(self.task_list):
-        if isinstance(task, WorkTask) and task.priority == "alta":
-            return i
-    return END
+      for i, task in enumerate(self.task_list):
+          if isinstance(task, WorkTask) and task.priority == "alta":
+              return i
+      return END
 
   def deleteTask(self):
     task_index = self.listbox.curselection()
