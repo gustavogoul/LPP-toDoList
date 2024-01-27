@@ -4,9 +4,10 @@
 
 ### Sobre o programa
 
-+ Aplicativo desenvolvido em python
++ Aplicativo desenvolvido em Python
 + Utiliza os conhecimentos aprendidos em sala de aula
 + Orientação a objetos (Classes, heranças, ...)
++ Dicionário
 + Exceção
 + Recursos da linguagem
 + Bibliotecas
